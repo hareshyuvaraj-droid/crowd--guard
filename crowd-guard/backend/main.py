@@ -3,6 +3,10 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 from contextlib import asynccontextmanager
 import asyncio
+import os
+from dotenv import load_dotenv
+
+load_dotenv()  # loads .env in local dev; on Render, env vars are set via dashboard
 
 from auth.routes   import router as auth_router
 from zones.routes  import router as zones_router
@@ -24,10 +28,16 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(title="CrowdGuard EC-9 API", version="2.0.0", lifespan=lifespan)
 
+# ── CORS ─────────────────────────────────────────────────────────────────────
+# allow_origins=["*"] with allow_credentials=True is invalid per CORS spec.
+# Use explicit frontend URL from env, fallback to wildcard (no credentials).
+_frontend_url = os.getenv("FRONTEND_URL", "")
+_origins = [_frontend_url] if _frontend_url else ["*"]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
+    allow_origins=_origins,
+    allow_credentials=bool(_frontend_url),   # only True when origin is explicit
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -51,7 +61,7 @@ async def video_stream(zone_id: str):
             frame = cv_engine.get_frame(zid)
             if frame:
                 yield b"--frame\r\nContent-Type: image/jpeg\r\n\r\n" + frame + b"\r\n"
-            await asyncio.sleep(0.1)   # non-blocking — yields control back to event loop
+            await asyncio.sleep(0.1)
     return StreamingResponse(frame_gen(), media_type="multipart/x-mixed-replace; boundary=frame")
 
 # ── LSTM Predictions ──────────────────────────────────────────────────────────

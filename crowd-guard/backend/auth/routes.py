@@ -12,14 +12,17 @@ router  = APIRouter()
 pwd_ctx = CryptContext(schemes=["bcrypt"], deprecated="auto")
 bearer  = HTTPBearer()
 
-SECRET = os.getenv("JWT_SECRET")
-ALGO   = "HS256"
+ALGO = "HS256"
 
-if not SECRET:
-    raise RuntimeError(
-        "❌ JWT_SECRET environment variable is not set. "
-        "Copy backend/.env.example to backend/.env and set a strong secret before running."
-    )
+def _secret() -> str:
+    """Lazy-load JWT_SECRET so the app can import during build without crashing."""
+    s = os.getenv("JWT_SECRET")
+    if not s:
+        raise RuntimeError(
+            "❌ JWT_SECRET environment variable is not set. "
+            "Set it in Render → Environment Variables before deploying."
+        )
+    return s
 
 # ── schemas ──────────────────────────────────────────────
 class RegisterReq(BaseModel):
@@ -35,11 +38,11 @@ class LoginReq(BaseModel):
 # ── helpers ──────────────────────────────────────────────
 def make_token(user_id: str, role: str) -> str:
     exp = datetime.utcnow() + timedelta(days=7)
-    return jwt.encode({"sub": user_id, "role": role, "exp": exp}, SECRET, ALGO)
+    return jwt.encode({"sub": user_id, "role": role, "exp": exp}, _secret(), ALGO)
 
 async def get_current_user(creds: HTTPAuthorizationCredentials = Depends(bearer)):
     try:
-        payload = jwt.decode(creds.credentials, SECRET, algorithms=[ALGO])
+        payload = jwt.decode(creds.credentials, _secret(), algorithms=[ALGO])
         user = await User.get(payload["sub"])
         if not user:
             raise HTTPException(401, "User not found")
