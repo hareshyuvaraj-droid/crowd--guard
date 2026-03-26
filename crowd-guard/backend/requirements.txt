@@ -1,0 +1,21 @@
+# Web framework
+fastapi==0.111.0
+uvicorn[standard]==0.29.0
+
+# Database
+motor==3.4.0
+beanie==1.26.0
+
+# Auth
+pydantic[email]==2.7.1
+passlib[bcrypt]==1.7.4
+python-jose[cryptography]==3.3.0
+python-dotenv==1.0.1
+
+# Computer Vision
+opencv-python-headless==4.9.0.80
+ultralytics==8.2.18
+
+# AI / LSTM
+tensorflow==2.16.1
+numpy==1.26.4

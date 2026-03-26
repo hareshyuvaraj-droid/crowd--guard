@@ -1,0 +1,47 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    background-color: #050b14;
+    color: #ccd6f6;
+    font-family: 'Syne', sans-serif;
+  }
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: #112240; border-radius: 2px; }
+}
+
+@layer utilities {
+  .grid-bg {
+    background-image:
+      linear-gradient(rgba(0,229,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,229,255,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+  }
+  .glow-accent { box-shadow: 0 0 20px rgba(0,229,255,0.15); }
+  .glow-danger { box-shadow: 0 0 20px rgba(255,59,92,0.2); }
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.2; }
+}
+@keyframes scanMove {
+  from { top: 0; }
+  to { top: 100%; }
+}
+@keyframes dangerPulse {
+  0%, 100% { box-shadow: 0 0 0 rgba(255,59,92,0); }
+  50% { box-shadow: 0 0 24px rgba(255,59,92,0.35); }
+}
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.animate-blink    { animation: blink 1.2s ease-in-out infinite; }
+.animate-scan     { animation: scanMove 4s linear infinite; }
+.animate-danger   { animation: dangerPulse 1.5s ease-in-out infinite; }
+.animate-fadeIn   { animation: fadeIn 0.4s ease forwards; }
